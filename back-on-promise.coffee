@@ -90,6 +90,7 @@ class BOP.BOPModel extends Backbone.Model
 
   toJSON: (options) ->
     json = super
+
     #delete all relationships
     for rel in @get_relationships()
       delete json[rel.name]

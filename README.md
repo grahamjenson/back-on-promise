@@ -1,47 +1,47 @@
-#Elasticbone
+#Back-On-Promise
 
 NOTE: This project is still in development, and not production ready. Though hopefully soon it will be.
 
-[Elasticsearch](http://www.elasticsearch.org/) is an awesome document store, with a nice rest api.
 [Backbone](http://backbonejs.org/) is an awesome MVC framework, where the model are defined to interact with a rest api.
-Elasticbone is an extension making it easy for Backbone models to be connected to Elasticsearch documents.
+This is a simple library that wraps the ```get``` method in Backbone and returns a promise for the data.
+This way the actual data may transparently exist remotly and be fetched only if required.
 
-Elasticbone is (should be) usable in both a browser, or node.js server.
+This library should be usable in both a browser, or on a node.js server.
 
 To install
 
 ```
-npm install elasticbone
+npm install back-on-promise
 ```
 
 ##Examples
-The easiest way to describe elasticbone is to give a few examples based on creating a blog.
+The easiest way to describe its features is to give a few examples based on creating a blog.
 
 ```
-Elasticbone = require 'elasticbone'
+BOP = require 'back-on-promise'
 
-class User extends Elasticbone.ElasticModel
+class User extends BOP.BOPModel
 
-class Post extends Elasticbone.ElasticModel
+class Post extends BOP.BOPModel
 
-class Posts extends Elasticbone.ElasticCollection
+class Posts extends BOP.BOPCollection
   model: Post
 ```
 
-Elasticmodels and elasticcollections reference an elasticsearch server, index and type.
+BOPmodels and BOPcollections reference an BOPsearch server, index and type.
 
 The default type is the name of the model, in the case of a collection there is no default type.
 
 ```
-class User extends Elasticbone.ElasticModel
+class User extends BOP.BOPModel
   server: 'localhost:9000' 
   index: 'blog'
 
-class Post extends Elasticbone.ElasticModel
+class Post extends BOP.BOPModel
   server: 'localhost:9000' 
   index: 'blog'
 
-class Posts extends Elasticbone.ElasticCollection
+class Posts extends BOP.BOPCollection
   server: 'localhost:9000' 
   index: 'blog'
   type: 'Post'
@@ -49,14 +49,14 @@ class Posts extends Elasticbone.ElasticCollection
 ```
 
 ###Relationships
-Elasticbone also lets you define relationships between backbone models and elasticsearch documents.
+BOP also lets you define relationships between backbone models and BOPsearch documents.
 
 To relate models together the ```has``` function (*inspired by rails*) is used, and options are passed to it.
 The basic structure is ```has 'attribute', Model, {options}```
 
 By default the relationship will be treated as a subdocument, e.g.
 
-Given a ```Post``` document in elasticsearch looks like:
+Given a ```Post``` document in BOPsearch looks like:
 
 ```
 {
@@ -64,27 +64,27 @@ tags: [{name: 'foo'}, {name: 'bar'}]
 }
 ```
 
-This relationships would be defined using elasticbone as such,
+This relationships would be defined using BOP as such,
 
 ```
 class Tag extends Backbone.Model
 
 class Tags extends Backbone.Collection
 
-class Post extends Elasticbone.ElasticModel
+class Post extends BOP.BOPModel
   ...
   @has 'tags', Tags
 ```
 
-NOTE: Tag is not an ElasticModel as it is not a document in Elasticsearch.
+NOTE: Tag is not an BOPModel as it is not a document in BOPsearch.
 
-###has seperate ElasticModel relationship
+###has seperate BOPModel relationship
 
 ```
-class Posts extends Elasticbone.ElasticCollection
+class Posts extends BOP.BOPCollection
   fetch_query: -> {"query":{"field": {"author":"\"#{this.get('user').name}\""}}}
     
-class User extends Elasticbone.ElasticModel
+class User extends BOP.BOPModel
   ...
   @has 'posts', Posts, method: 'fetch'
 
@@ -92,9 +92,9 @@ user = new User(id: 1)
 $.when(user.fetch()).done( (user) -> user.get('posts'))
 ```
 
-Since fetching the ```posts``` is expencive Elasticbone will delay it until a ```get``` is called to retreive them.
+Since fetching the ```posts``` is expencive BOP will delay it until a ```get``` is called to retreive them.
 This uses jquery promises, so that you can register when a callback is fired.
-When ```user.get('posts')``` a promise is returned for the posts that are fetched out of elasticsearch using the 
+When ```user.get('posts')``` a promise is returned for the posts that are fetched out of BOPsearch using the 
 ```fetch_query```. This query returns all posts where the field ```author``` is exactly the users name.
 
 
@@ -104,19 +104,19 @@ A problem occurs when a model wants to have reverse relations, e.g. a user has p
 As javascript will execute in order THIS CODE WILL NOT WORK, because when User references posts it will not exist yet.
 
 ```
-class User extends Elasticbone.ElasticModel
+class User extends BOP.BOPModel
   @has 'posts', Posts
 
-class Posts extends Elasticbone.ElasticCollection
+class Posts extends BOP.BOPCollection
   @has 'author', User 
 ```
 
 Instead you can use ```has``` after the classes declaration
 
 ```
-class User extends Elasticbone.ElasticModel
+class User extends BOP.BOPModel
 
-class Posts extends Elasticbone.ElasticCollection
+class Posts extends BOP.BOPCollection
   @has 'author', User
 
 User.has 'posts', Posts
@@ -125,21 +125,21 @@ User.has 'posts', Posts
 
 #GeoRegion & GeoJSON
 
-A supported feature of elasticsearch is its GeoJSON querying with ``` GeoQuery.find_intersecting ```
+A supported feature of BOPsearch is its GeoJSON querying with ``` GeoQuery.find_intersecting ```
 
 ```
-class Photo extends Elasticbone.ElasticModel
+class Photo extends BOP.BOPModel
   ...
-  @has 'location', Elasticbone.GeoShape
+  @has 'location', BOP.GeoShape
 
-class Photos extends Elasticbone.ElasticCollection
+class Photos extends BOP.BOPCollection
   model: Photo
 
-class GeoRegion extends Elasticbone.ElasticModel
+class GeoRegion extends BOP.BOPModel
   ...
-  @has 'geo_shape', Elasticbone.GeoShape
+  @has 'geo_shape', BOP.GeoShape
 
-class GeoRegions extends Elasticbone.ElasticCollection
+class GeoRegions extends BOP.BOPCollection
   model: GeoRegion
 ```
 
