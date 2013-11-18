@@ -56,7 +56,11 @@ class BOP.BOPModel extends Backbone.Model
     rels
 
   set_model_values: (m, attr) ->
-    m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
+    if m instanceof Backbone.Model
+      m.set(@get_relationship_reverse(attr), @) if @has_relationship_reverse(attr)
+    else if m instanceof Backbone.Collection
+      m[@get_relationship_reverse(attr)] = @
+
     m._parent = @
     m._field_name = attr
 
@@ -104,10 +108,6 @@ class BOP.BOPModel extends Backbone.Model
         json[rel.name] = x.toJSON(options) if x
       )
     json
-
-class BOP.BOPCollection extends Backbone.Collection
-  set_reverse: () ->
-    console.log 'TODO'
 
 #AMD
 if (typeof define != 'undefined' && define.amd)

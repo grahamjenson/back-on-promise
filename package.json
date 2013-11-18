@@ -1,6 +1,6 @@
 {
   "name"          : "back-on-promise",
-  "description"   : "Model relationship library for Backbone",
+  "description"   : "Model relationship library for Backbone using promises",
   "url"           : "https://github.com/grahamjenson/back-on-promise.git",
   "keywords"      : ["model", "promise", "backbone"],
   "author"        : "Graham Jenson <grahamjenson@maori.geek.nz>",
@@ -15,7 +15,6 @@
     "coffee-script": "1.6.1"
   },
   "scripts": {
-    "build": "./node_modules/.bin/coffee -c back-on-promise.coffee",
     "test": "mocha --compilers coffee:coffee-script -C"
   },
   "main"          : "back-on-promise.js",

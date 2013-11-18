@@ -19,9 +19,13 @@ class TestObject extends BOP.BOPModel
   @has 'bo', BasicObject
   @has 'bfo', BasicFetchObject, method: 'fetch'
 
-class TestCollection extends BOP.BOPCollection
-  url: 'http://testcollection'
+class TestCollection extends Backbone.Collection
+  url: -> "http://testObject/#{@.test.id}/collection"
   model: TestObject
+
+TestObject.has 'test_col', TestCollection, method: 'fetch', reverse: 'test'
+
+
 
 
 
@@ -180,4 +184,26 @@ describe 'has relationship function,', ->
         $.ajax.restore()
         done()
       )
-      
+    
+    it 'should set the reverse relationship before fetching', (done) ->
+      sinon.stub($, 'ajax', (req) -> 
+        req.url.should.equal 'http://testObject/1/collection'
+        req.success([{name: 'to_1'}, {name: 'to_2'} ], {}, {})
+      )
+
+      to = new TestObject({name: 'test', id: "1"},{parse: true})
+      $.when(to.get('test_col')).then( (tcol) ->
+        tcol.models.length.should.equal 2
+        return tcol.models[0].get('name')
+      )
+      .done( (name) ->
+        name.should.equal 'to_1'
+        sinon.assert.calledOnce($.ajax);
+      )
+      .fail( -> 
+        sinon.assert.fail()
+      )
+      .always( -> 
+        $.ajax.restore()
+        done()
+      )
