@@ -82,13 +82,15 @@ describe 'has relationship function,', ->
       )
 
     it 'should save model including all parse relationship', (done) ->
-      to_json = {name: 'test', bo: {name: 'bo_test'}}
+      to_json = {name: 'test', id: 'new_id', bo: {name: 'bo_test'}}
+
       sinon.stub($, 'ajax', (req) -> 
         req.data.should.equal JSON.stringify(to_json)
         req.success(to_json, {}, {})
       )
-      
-      to = new TestObject(to_json,{parse: true})
+
+      to = new TestObject(to_json, {parse: true})
+
       $.when(to.save()).done( (bo) ->
         to.id.should.equal 'new_id'
         sinon.assert.calledOnce($.ajax);
@@ -136,9 +138,10 @@ describe 'has relationship function,', ->
 
     it 'should not save the sub relationship', (done) ->
       #as it is another documnet
-      to_json = {name: 'test', bfo: {name: 'bfo_test'}}
+      to_json = {name: 'test', id: 'new_id', bfo: {name: 'bfo_test'}}
+
       sinon.stub($, 'ajax', (req) -> 
-        req.data.should.equal JSON.stringify({name: 'test'})
+        req.data.should.equal JSON.stringify({name: 'test', id: 'new_id'})
         req.success(to_json, {}, {})
       )
 
@@ -158,7 +161,7 @@ describe 'has relationship function,', ->
     it 'should fetch on get', (done) ->
       sinon.stub($, 'ajax', (req) -> 
         req.url.should.equal 'http://basicobject'
-        req.success({name: 'bfo_test' }, {}, {})
+        req.success({name: 'bfo_test', id: 'new_id'}, {}, {})
       )
 
       to = new TestObject({name: 'test'},{parse: true})

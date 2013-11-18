@@ -79,6 +79,8 @@ class BOP.BOPModel extends Backbone.Model
 
   parse: (data, options) ->
     parsed = super(data, options)
+    #create new object
+    parsed = _.extend({}, parsed)
 
     for val in @get_relationships()
         if parsed[val.name]
@@ -91,10 +93,11 @@ class BOP.BOPModel extends Backbone.Model
   toJSON: (options) ->
     json = super
 
-    #delete all relationships
+    #delete all relationships in json
     for rel in @get_relationships()
       delete json[rel.name]
 
+    #add back relationships that are parse
     for rel in @get_relationships(method: 'parse')
       #ASSUMPTION: ALL PARSE RELATIONSHIPS WILL BE RESOLVED GET
       @get(rel.name).done( (x) ->
